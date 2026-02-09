@@ -16,7 +16,8 @@ async def create_user(user: UserCreate):
         
         # Create user (password will be hashed in crud.create_user)
         db_user = crud.create_user(db, user)
-        return db_user
+        result = UserResponse.model_validate(db_user)
+    return result
 
 @router.post("/login")
 async def login(credentials: UserLogin):
@@ -48,7 +49,8 @@ async def get_users(skip: int = 0, limit: int = 100):
     """Get all users (passwords not included in response)."""
     with get_db() as db:
         users = crud.get_users(db, skip=skip, limit=limit)
-        return users
+        result = [UserResponse.model_validate(user) for user in users]
+    return result
 
 @router.get("/list/{user_id}", response_model=UserResponse)
 async def get_user(user_id: int):
@@ -56,7 +58,8 @@ async def get_user(user_id: int):
     with get_db() as db:
         user = crud.get_user_by_id(db, user_id)
         await exception_helper(user, "get_id")
-        return user
+        result = UserResponse.model_validate(user)
+    return result
 
 @router.put("/update/{user_id}", response_model=UserResponse)
 async def update_user(user_id: int, user: UserUpdate):
@@ -68,7 +71,8 @@ async def update_user(user_id: int, user: UserUpdate):
         updated_user = crud.update_user(db, user_id, user)
         if not updated_user:
             raise HTTPException(status_code=500, detail="Failed to update user")
-        return updated_user
+        result = UserResponse.model_validate(updated_user)
+    return result
 
 @router.delete("/delete/{user_id}")
 async def delete_user(user_id: int):
