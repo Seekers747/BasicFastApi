@@ -16,4 +16,4 @@ async def exception_helper(user, functionType: str, users: dict = None):
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
     else:
-        raise HTTPException(status_code=500, detail="Invalid function type for exceptionHelper")
+        raise HTTPException(status_code=500, detail="Invalid function type for exception_helper")
