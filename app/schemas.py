@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field # pyright: ignore[reportMissingImports]
+from pydantic import BaseModel, EmailStr, Field # type: ignore[reportMissingImports]
 
 # Base schema with common attributes
 class UserBase(BaseModel):
@@ -13,16 +13,14 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: str = Field(..., min_length=8, description="User password")
 
-# Schema for returning user data (no password!)
+# Schema for returning user data (NO PASSWORD!)
 class UserResponse(UserBase):
     id: int
     
     class Config:
-        from_attributes = True  # Allows Pydantic to work with SQLAlchemy models
-
-# Schema with password (only used internally if needed)
-class UserInDB(UserResponse):
-    password: str
-    
-    class Config:
         from_attributes = True
+
+# Schema for login
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

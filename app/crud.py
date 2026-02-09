@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session # type: ignore[reportMissingImports]
 from typing import Optional
-from .models import User  # pyright: ignore[reportMissingImports]
-from .schemas import UserCreate, UserUpdate  # pyright: ignore[reportMissingImports]
+from .models import User
+from .schemas import UserCreate, UserUpdate
+from .security import hash_password
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     """Get a user by ID."""
@@ -16,11 +17,14 @@ def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: UserCreate) -> User:
-    """Create a new user."""
+    """Create a new user with hashed password."""
+    # Hash the password before storing
+    hashed_password = hash_password(user.password)
+    
     db_user = User(
         username=user.username,
         email=user.email,
-        password=user.password  # In production: hash this!
+        password=hashed_password  # Store hashed password
     )
     db.add(db_user)
     db.commit()
@@ -28,12 +32,13 @@ def create_user(db: Session, user: UserCreate) -> User:
     return db_user
 
 def update_user(db: Session, user_id: int, user: UserUpdate) -> Optional[User]:
-    """Update a user."""
+    """Update a user with hashed password."""
     db_user = get_user_by_id(db, user_id)
     if db_user:
         db_user.username = user.username
         db_user.email = user.email
-        db_user.password = user.password  # In production: hash this!
+        # Hash the password before updating
+        db_user.password = hash_password(user.password)
         db.commit()
         db.refresh(db_user)
     return db_user
@@ -46,3 +51,27 @@ def delete_user(db: Session, user_id: int) -> bool:
         db.commit()
         return True
     return False
+
+def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+    """
+    Authenticate a user by email and password.
+    
+    Args:
+        db: Database session
+        email: User email
+        password: Plain text password
+    
+    Returns:
+        User object if authentication successful, None otherwise
+    """
+    from .security import verify_password
+    
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
+    
+    # Verify the password
+    if not verify_password(password, user.password):
+        return None
+    
+    return user
