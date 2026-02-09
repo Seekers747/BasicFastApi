@@ -16,8 +16,9 @@ class UserCreate(BaseModel):
 async def create_user(user: UserCreate):
     global current_id
     await exception_helper(user, "create", users)
-    users[current_id] = user.dict()
-    response = {"id": current_id, **user.dict()}
+    # Use model_dump() instead of dict() for Pydantic v2
+    users[current_id] = user.model_dump()
+    response = {"id": current_id, **user.model_dump()}
     current_id += 1
     return response
 
@@ -38,8 +39,8 @@ async def get_user(user_id: int):
 async def update_user(user_id: int, user: UserCreate):
     current_user = users.get(user_id)
     await exception_helper(current_user, "get_id")
-    users[user_id] = user.dict()
-    return {"id": user_id, **user.dict()}
+    users[user_id] = user.model_dump()
+    return {"id": user_id, **user.model_dump()}
 
 @router.delete("/delete/{user_id}")
 async def delete_user(user_id: int):
