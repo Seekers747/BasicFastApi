@@ -1,6 +1,6 @@
 from fastapi import HTTPException, APIRouter # type: ignore[reportMissingImports]
 from pydantic import BaseModel # pyright: ignore[reportMissingImports]
-from helper import exception_helper  # pyright: ignore[reportMissingImports]
+from .helper import exception_helper  # pyright: ignore[reportMissingImports]
 
 router = APIRouter()
 
