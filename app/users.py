@@ -19,31 +19,6 @@ async def create_user(user: UserCreate):
         result = UserResponse.model_validate(db_user)
     return result
 
-@router.post("/login")
-async def login(credentials: UserLogin):
-    """
-    Authenticate a user.
-    
-    This verifies the email and password, checking the hashed password.
-    """
-    with get_db() as db:
-        user = crud.authenticate_user(db, credentials.email, credentials.password)
-        
-        if not user:
-            raise HTTPException(
-                status_code=401,
-                detail="Incorrect email or password"
-            )
-        
-        return {
-            "message": "Login successful",
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email
-            }
-        }
-
 @router.get("/list", response_model=list[UserResponse])
 async def get_users(skip: int = 0, limit: int = 100):
     """Get all users (passwords not included in response)."""
@@ -85,3 +60,27 @@ async def delete_user(user_id: int):
         if not success:
             raise HTTPException(status_code=500, detail="Failed to delete user")
         return {"detail": "User deleted successfully"}
+    
+@router.post("/login")
+async def login(credentials: UserLogin):
+    """
+    Authenticate a user.
+    
+    This verifies the username and password, checking the hashed password.
+    """
+    with get_db() as db:
+        user = crud.authenticate_user(db, credentials.username, credentials.password)
+        
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Incorrect username or password"
+            )
+        
+        return {
+            "message": "Login successful",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+            }
+        }

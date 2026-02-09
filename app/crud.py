@@ -12,6 +12,10 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get a user by email."""
     return db.query(User).filter(User.email == email).first()
 
+def get_user_by_username(db: Session, username: str) -> Optional[User]:
+    """Get a user by username."""
+    return db.query(User).filter(User.username == username).first()
+
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
     """Get all users with pagination."""
     return db.query(User).offset(skip).limit(limit).all()
@@ -52,13 +56,13 @@ def delete_user(db: Session, user_id: int) -> bool:
         return True
     return False
 
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
     """
-    Authenticate a user by email and password.
+    Authenticate a user by username and password.
     
     Args:
         db: Database session
-        email: User email
+        username: User username
         password: Plain text password
     
     Returns:
@@ -66,7 +70,7 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """
     from .security import verify_password
     
-    user = get_user_by_email(db, email)
+    user = get_user_by_username(db, username)
     if not user:
         return None
     

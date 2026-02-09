@@ -25,6 +25,43 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
             resultDiv.textContent = `User created successfully! ID: ${result.id}`;
             document.getElementById('createUserForm').reset();
             loadUsers(); // Refresh the user list
+            window.location.replace('/login');
+        } else {
+            resultDiv.className = 'error';
+            resultDiv.textContent = `Error: ${result.detail}`;
+        }
+    } catch (error) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.className = 'error';
+        resultDiv.textContent = `Error: ${error.message}`;
+    }
+});
+
+// Login User
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const loginData = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+    };
+
+    try {
+        const response = await fetch('/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        const result = await response.json();
+        const resultDiv = document.getElementById('result');
+
+        if (response.ok) {
+            resultDiv.className = 'success';
+            resultDiv.textContent = `Login successful! Welcome, ${result.username}`;
+            window.location.replace('/dashboard');
         } else {
             resultDiv.className = 'error';
             resultDiv.textContent = `Error: ${result.detail}`;

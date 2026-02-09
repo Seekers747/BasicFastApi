@@ -20,4 +20,8 @@ app.include_router(users_router, prefix="/users", tags=["users"])
 # Serve the HTML page at root
 @app.get("/")
 async def read_root():
-    return FileResponse("app/static/index.html")
+    return FileResponse("app/static/register.html")
+
+@app.get("/login")
+async def read_login():
+    return FileResponse("app/static/login.html")
